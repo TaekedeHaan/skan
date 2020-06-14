@@ -6,7 +6,7 @@ from skimage import img_as_float, morphology
 from skimage.color import gray2rgb
 
 
-def _normalise_image(image, *, image_cmap=None):
+def _normalise_image(image, image_cmap=None):
     image = img_as_float(image)
     if image.ndim == 2:
         if image_cmap is None:
@@ -41,7 +41,7 @@ def pixel_perfect_figsize(image, dpi=80):
     return wpix/dpi, hpix/dpi
 
 
-def overlay_skeleton_2d(image, skeleton, *,
+def overlay_skeleton_2d(image, skeleton,
                         image_cmap=None, color=(1, 0, 0), alpha=1,
                         dilate=0, axes=None):
     """Overlay the skeleton pixels on the input image.
@@ -87,7 +87,7 @@ def overlay_skeleton_2d(image, skeleton, *,
     return axes
 
 
-def overlay_euclidean_skeleton_2d(image, stats, *,
+def overlay_euclidean_skeleton_2d(image, stats,
                                   image_cmap=None,
                                   skeleton_color_source='branch-type',
                                   skeleton_colormap='viridis',
@@ -147,7 +147,7 @@ def overlay_euclidean_skeleton_2d(image, stats, *,
     return axes
 
 
-def overlay_skeleton_2d_class(skeleton, *,
+def overlay_skeleton_2d_class(skeleton,
                               image_cmap='gray',
                               skeleton_color_source='path_means',
                               skeleton_colormap='viridis',
@@ -223,7 +223,7 @@ def overlay_skeleton_2d_class(skeleton, *,
     return axes, mappable
 
 
-def pipeline_plot(image, thresholded, skeleton, stats, *,
+def pipeline_plot(image, thresholded, skeleton, stats,
                   figure=None, axes=None, figsize=(9, 9)):
     """Draw the image, the thresholded version, and its skeleton.
 
@@ -296,7 +296,7 @@ def _clean_positions_dict(d, g):
             g.remove_node(k)
 
 
-def overlay_skeleton_networkx(csr_graph, coordinates, *, axis=None,
+def overlay_skeleton_networkx(csr_graph, coordinates, axis=None,
                               image=None, cmap=None, **kwargs):
     """Draw the skeleton as a NetworkX graph, optionally overlaid on an image.
 
