@@ -18,10 +18,10 @@ import click
 from . import pre, pipe, draw, io, __version__
 
 
-@asyncio.coroutine
-def _async(coroutine, *args):
-    loop = asyncio.get_event_loop()
-    return (yield from loop.run_in_executor(None, coroutine, *args))
+#@asyncio.coroutine
+#def _async(coroutine, *args):
+#    loop = asyncio.get_event_loop()
+#    return (yield from loop.run_in_executor(None, coroutine, *args))
 
 
 STANDARD_MARGIN = (3, 3, 12, 12)
@@ -102,9 +102,9 @@ class Launch(tk.Tk):
                 self.output_folder = Path(os.path.expanduser(value))
                 params_dict.pop(param)
             elif param.lower() == 'version':
-                print(f'Parameter file version: {params_dict.pop(param)}')
+                print('Parameter file version: %s' %{params_dict.pop(param)})
         for param in params_dict:
-            print(f'Parameter not recognised: {param}')
+            print('Parameter not recognised: %s' %{param})
 
     def save_parameters(self, filename=None):
         out = {p._name.lower(): p.get() for p in self.parameters}
@@ -116,7 +116,7 @@ class Launch(tk.Tk):
         attempt = 0
         base, ext = os.path.splitext(filename)
         while os.path.exists(filename):
-            filename = f'{base} ({attempt}){ext}'
+            filename = '{%s} ({%s}){%s}' %(base, attempt, ext)
             attempt += 1
         with open(filename, mode='wt') as fout:
             json.dump(out, fout, indent=2)
@@ -194,7 +194,7 @@ class Launch(tk.Tk):
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
-    async def run(self):
+    def run(self): # async 
         print('Input files:')
         for file in self.input_files:
             print('  ', file)
