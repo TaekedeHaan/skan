@@ -10,7 +10,7 @@ def broadcast_mgrid(arrays):
     ndim = len(shape)
     result = []
     for i, arr in enumerate(arrays, start=1):
-        reshaped = np.broadcast_to(arr[(...,) + (np.newaxis,) * (ndim - i)],
+        reshaped = np.broadcast_to(arr[(np.newaxis,) * (ndim - i)], # (...,) + 
                                    shape)
         result.append(reshaped)
     return result
