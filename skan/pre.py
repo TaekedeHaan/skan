@@ -39,7 +39,7 @@ def hyperball(ndim, radius):
     return ball
 
 
-def threshold(image, *, sigma=0., radius=0, offset=0.,
+def threshold(image, sigma=0., radius=0, offset=0.,
               method='sauvola', smooth_method='Gaussian'):
     """Use scikit-image filters to "intelligently" threshold an image.
 
