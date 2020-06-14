@@ -45,7 +45,7 @@ def mesh_sizes(skeleton):
     return sizes
 
 
-def image_summary(skeleton, *, spacing=1):
+def image_summary(skeleton, spacing=1):
     """Compute some summary statistics for an image.
 
     Parameters
