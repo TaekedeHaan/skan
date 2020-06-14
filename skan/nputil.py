@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 
 # adapted from github.com/janelia-flyem/gala
-def smallest_int_dtype(number, *, signed=False, min_dtype=np.int8):
+def smallest_int_dtype(number, signed=False, min_dtype=np.int8):
     """Return the smallest numpy integer dtype that can represent `number`.
 
     Parameters
@@ -69,7 +69,7 @@ def smallest_int_dtype(number, *, signed=False, min_dtype=np.int8):
 
 
 # adapted from github.com/janelia-flyem/gala
-def pad(ar, vals, *, axes=None):
+def pad(ar, vals, axes=None):
     """Pad an array with values in `vals` along `axes`.
 
     Parameters
@@ -131,7 +131,7 @@ def pad(ar, vals, *, axes=None):
     return ar2
 
 
-def raveled_steps_to_neighbors(shape, connectivity=1, *, order='C', spacing=1,
+def raveled_steps_to_neighbors(shape, connectivity=1, order='C', spacing=1,
                                return_distances=True):
     """Return raveled coordinate steps for given array shape and neighborhood.
 
@@ -186,8 +186,8 @@ def raveled_steps_to_neighbors(shape, connectivity=1, *, order='C', spacing=1,
         prod = np.array(list(itertools.product(*[[1, -1]] * nhops)))
         multisteps = np.array(list(itertools.combinations(stepsizes, nhops))).T
         dhopsq = np.array(list(itertools.combinations(spacing ** 2, nhops))).T
-        steps.append((prod @ multisteps).ravel())
-        distances.append(np.sqrt(np.abs(prod) @ dhopsq).ravel())
+        steps.append(( np.dot(prod, multisteps)).ravel())
+        distances.append(np.sqrt( np.dot( np.abs(prod), dhopsq)).ravel())
     if return_distances:
         return (np.concatenate(steps).astype(int),
                 np.concatenate(distances))

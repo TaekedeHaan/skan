@@ -3,22 +3,22 @@ import pandas as pd
 from scipy import sparse, ndimage as ndi
 from scipy.sparse import csgraph
 from scipy import spatial
-import numba
+# import numba
 
 from .nputil import pad, raveled_steps_to_neighbors
 
 
 ## NBGraph and Numba-based implementation
 
-csr_spec = [
-    ('indptr', numba.int32[:]),
-    ('indices', numba.int32[:]),
-    ('data', numba.float64[:]),
-    ('shape', numba.int32[:]),
-    ('node_properties', numba.float64[:])
-]
+#csr_spec = [
+#    ('indptr', numba.int32[:]),
+#    ('indices', numba.int32[:]),
+#    ('data', numba.float64[:]),
+#    ('shape', numba.int32[:]),
+#    ('node_properties', numba.float64[:])
+#]
 
-@numba.jitclass(csr_spec)
+# @numba.jitclass(csr_spec)
 class NBGraph:
     def __init__(self, indptr, indices, data, shape, node_props):
         self.indptr = indptr
@@ -60,7 +60,7 @@ def _pixel_graph(image, steps, distances, num_edges, height=None):
     return graph
 
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+# @numba.jit(nopython=True, cache=True, nogil=True)
 def _write_pixel_graph(image, steps, distances, row, col, data):
     """Step over `image` to build a graph of nonzero pixel neighbors.
 
@@ -111,7 +111,7 @@ def _write_pixel_graph(image, steps, distances, row, col, data):
                     k += 1
     return k
 
-@numba.jit(nopython=True, cache=True, nogil=True)
+# @numba.jit(nopython=True, cache=True, nogil=True)
 def _write_pixel_graph_height(image, height, steps, distances, row, col, data):
     """Step over `image` to build a graph of nonzero pixel neighbors.
 
@@ -172,7 +172,7 @@ def _write_pixel_graph_height(image, height, steps, distances, row, col, data):
     return k
 
 
-@numba.jit(nopython=True, cache=False)  # change this to True with Numba 1.0
+# @numba.jit(nopython=True, cache=False)  # change this to True with Numba 1.0
 def _build_paths(jgraph, indptr, indices, path_data, visited, degrees):
     indptr_i = 0
     indices_j = 0
@@ -202,7 +202,7 @@ def _build_paths(jgraph, indptr, indices, path_data, visited, degrees):
     return indptr_i + 1, indices_j
 
 
-@numba.jit(nopython=True, cache=False)  # change this to True with Numba 1.0
+# @numba.jit(nopython=True, cache=False)  # change this to True with Numba 1.0
 def _walk_path(jgraph, node, neighbor, visited, degrees, indices, path_data,
                startj):
     indices[startj] = node
@@ -222,7 +222,7 @@ def _walk_path(jgraph, node, neighbor, visited, degrees, indices, path_data,
     return j - startj + 1
 
 
-def _build_skeleton_path_graph(graph, *, _buffer_size_offset=None):
+def _build_skeleton_path_graph(graph, _buffer_size_offset=None):
     if _buffer_size_offset is None:
         max_num_cycles = graph.indices.size // 4
         _buffer_size_offset = max_num_cycles
@@ -314,7 +314,7 @@ class Skeleton:
         The image from which the skeleton was derived. Only present if
         `keep_images` is True. This is useful for visualization.
     """
-    def __init__(self, skeleton_image, *, spacing=1, source_image=None,
+    def __init__(self, skeleton_image, spacing=1, source_image=None,
                  _buffer_size_offset=None, keep_images=True, 
                  unique_junctions=True):
         graph, coords, degrees = skeleton_to_csgraph(skeleton_image,
@@ -360,12 +360,12 @@ class Skeleton:
         # The below is equivalent to `self.paths[index].indices`, which is much
         # more elegant. However the below version is about 25x faster!
         # In [14]: %timeit mat[1].indices
-        # 128 µs ± 421 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+        # 128 micros +- 421 ns per loop (mean +- std. dev. of 7 runs, 10000 loops each)
         # In [16]: %%timeit
         # ...: start, stop = mat.indptr[1:3]
         # ...: mat.indices[start:stop]
         # ...:
-        # 5.05 µs ± 77.2 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+        # 5.05 +- 77.2 ns per loop (mean +- std. dev. of 7 runs, 100000 loops each)
         start, stop = self.paths.indptr[index:index+2]
         return self.paths.indices[start:stop]
 
@@ -454,7 +454,7 @@ class Skeleton:
         return np.sqrt(np.clip(sumsq/lengths - means*means, 0, None))
 
 
-def summarize(skel: Skeleton):
+def summarize(skel):
     """Compute statistics for every skeleton and branch in ``skel``.
 
     Parameters
@@ -488,23 +488,25 @@ def summarize(skel: Skeleton):
     summary['mean-pixel-value'] = skel.path_means()
     summary['stdev-pixel-value'] = skel.path_stdev()
     for i in range(ndim):  # keep loops separate for best insertion order
-        summary[f'image-coord-src-{i}'] = skel.coordinates[endpoints_src, i]
+        summary['image-coord-src-{%s}' %i] = skel.coordinates[endpoints_src, i]
     for i in range(ndim):
-        summary[f'image-coord-dst-{i}'] = skel.coordinates[endpoints_dst, i]
+        summary['image-coord-dst-{%s}' %i] = skel.coordinates[endpoints_dst, i]
     coords_real_src = skel.coordinates[endpoints_src] * skel.spacing
     for i in range(ndim):
-        summary[f'coord-src-{i}'] = coords_real_src[:, i]
+        summary['coord-src-{%s}' %i] = coords_real_src[:, i]
     coords_real_dst = skel.coordinates[endpoints_dst] * skel.spacing
     for i in range(ndim):
-        summary[f'coord-dst-{i}'] = coords_real_dst[:, i]
+        summary['coord-dst-{%s}' %i] = coords_real_dst[:, i]
     summary['euclidean-distance'] = (
-            np.sqrt((coords_real_dst - coords_real_src)**2 @ np.ones(ndim))
+            np.sqrt(
+                np.matmul((coords_real_dst - coords_real_src)**2, np.ones(ndim))
+            )
     )
     df = pd.DataFrame(summary)
     return df
 
 
-@numba.jit(nopython=True, nogil=True, cache=False)  # cache with Numba 1.0
+# @numba.jit(nopython=True, nogil=True, cache=False)  # cache with Numba 1.0
 def _compute_distances(graph, path_indptr, path_indices, distances):
     for i in range(len(distances)):
         start, stop = path_indptr[i:i+2]
@@ -512,7 +514,7 @@ def _compute_distances(graph, path_indptr, path_indices, distances):
         distances[i] = _path_distance(graph, path)
 
 
-@numba.jit(nopython=True, nogil=True, cache=False)  # cache with Numba 1.0
+# @numba.jit(nopython=True, nogil=True, cache=False)  # cache with Numba 1.0
 def _path_distance(graph, path):
     d = 0.
     n = len(path)
@@ -523,7 +525,7 @@ def _path_distance(graph, path):
 
 
 def _uniquify_junctions(csmat, pixel_indices, junction_labels,
-                        junction_centroids, *, spacing=1):
+                        junction_centroids, spacing=1):
     """Replace clustered pixels with degree > 2 by a single "floating" pixel.
 
     Parameters
@@ -553,7 +555,7 @@ def _uniquify_junctions(csmat, pixel_indices, junction_labels,
     csmat.data = np.maximum(csmat.data, tdata)
 
 
-def skeleton_to_csgraph(skel, *, spacing=1, value_is_height=False,
+def skeleton_to_csgraph(skel, spacing=1, value_is_height=False,
                         unique_junctions=True):
     """Convert a skeleton image of thin lines to a graph of neighbor pixels.
 
@@ -635,7 +637,7 @@ def skeleton_to_csgraph(skel, *, spacing=1, value_is_height=False,
     return graph, pixel_indices, degree_image
 
 
-@numba.jit(nopython=True, cache=True)
+# @numba.jit(nopython=True, cache=True)
 def _csrget(indices, indptr, data, row, col):
     """Fast lookup of value in a scipy.sparse.csr_matrix format table.
 
@@ -658,7 +660,7 @@ def _csrget(indices, indptr, data, row, col):
     return 0.
 
 
-@numba.jit(nopython=True)
+# @numba.jit(nopython=True)
 def _expand_path(graph, source, step, visited, degrees):
     """Walk a path on a graph until reaching a tip or junction.
 
@@ -710,7 +712,7 @@ def _expand_path(graph, source, step, visited, degrees):
     return step, d, n, s, degrees[step]
 
 
-@numba.jit(nopython=True, nogil=True)
+# @numba.jit(nopython=True, nogil=True)
 def _branch_statistics_loop(jgraph, degrees, visited, result):
     num_results = 0
     for node in range(1, jgraph.shape[0]):
@@ -751,7 +753,7 @@ def _branch_statistics_loop(jgraph, degrees, visited, result):
     return num_results
 
 
-def branch_statistics(graph, pixel_values=None, *,
+def branch_statistics(graph, pixel_values=None,
                       buffer_size_offset=0):
     """Compute the length and type of each branch in a skeleton graph.
 
@@ -822,7 +824,7 @@ def submatrix(M, idxs):
     return Msub
 
 
-def summarise(image, *, spacing=1, using_height=False):
+def summarise(image, spacing=1, using_height=False):
     """Compute statistics for every disjoint skeleton in `image`.
 
     **Note: this function is deprecated. Prefer** :func:`.summarize`.
