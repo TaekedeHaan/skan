@@ -480,7 +480,7 @@ def summarize(skel):
     summary['branch-distance'] = skel.path_lengths()
     deg_src = skel.degrees[endpoints_src]
     deg_dst = skel.degrees[endpoints_dst]
-    kind = np.full(deg_src.shape, 2)  # default: junction-to-junction
+    kind = np.full(deg_src.shape, 2, dtype=int)  # default: junction-to-junction
     kind[(deg_src == 1) | (deg_dst == 1)] = 1  # tip-junction
     kind[(deg_src == 1) & (deg_dst == 1)] = 0  # tip-tip
     kind[endpoints_src == endpoints_dst] = 3  # cycle
