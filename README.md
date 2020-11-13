@@ -1,7 +1,14 @@
 # skan: skeleton analysis in Python
-Python module to analyse skeleton (thin object) images
+This fork of [https://github.com/jni/skan](skan) has python 2 support at branch python-2.7. 
 
-[![Build Status](https://travis-ci.org/jni/skan.svg?branch=master)](https://travis-ci.org/jni/skan)
-[![Coverage Status](https://coveralls.io/repos/github/jni/skan/badge.svg?branch=master)](https://coveralls.io/github/jni/skan?branch=master)
+Note: I did not run any test, so things might have been broken.
+
+## installation
+
+```
+python2 -m pip install git+https://github.com/TaekedeHaan/skan.git@python-2.7
+```
+
+
 
 See the documentation at [https://jni.github.io/skan](https://jni.github.io/skan).
